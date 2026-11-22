@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Outfit board</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;800&display=swap">
+<style>
+:root{--bg:#e8e7ef;--panel:#f6f5fa;--ink:#1d1b2e;--mute:#6b6880;--line:#cfcde0;--accent:#2f3bff;--accent-ink:#fff;--dot:#c5c3d8}
+@media (prefers-color-scheme:dark){:root{--bg:#15141f;--panel:#1e1c2d;--ink:#ecebf5;--mute:#9a97b2;--line:#34314d;--accent:#7c86ff;--accent-ink:#10101a;--dot:#34314d}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Bricolage Grotesque",system-ui,-apple-system,Segoe UI,sans-serif;line-height:1.45}
+.wrap{max-width:1200px;margin:0 auto;padding:20px 16px 32px}
+h1{font-size:clamp(28px,5vw,44px);font-weight:800;letter-spacing:-.03em;margin:0 0 4px;line-height:1.05}
+.sub{color:var(--mute);margin:0 0 16px;max-width:60ch}
+form{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px}
+input[type=text]{flex:1 1 260px;min-width:0;padding:12px 14px;font:inherit;color:var(--ink);background:var(--panel);border:1.5px solid var(--line);border-radius:10px}
+input:focus,button:focus-visible{outline:2.5px solid var(--accent);outline-offset:2px}
+button{font:inherit;font-weight:600;cursor:pointer;border-radius:10px;border:1.5px solid var(--line);background:var(--panel);color:var(--ink);padding:10px 14px}
+button.go{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);padding:12px 18px}
+button:disabled{opacity:.6;cursor:wait}
+.note{font-size:13px;color:var(--mute);min-height:20px;margin:0 0 14px}
+.grid{display:grid;grid-template-columns:300px 1fr;gap:14px;align-items:start}
+@media(max-width:800px){.grid{grid-template-columns:1fr}}
+.panel{background:var(--panel);border:1.5px solid var(--line);border-radius:14px;padding:12px}
+.ph{display:flex;justify-content:space-between;align-items:center;margin:0 0 10px;font-weight:600}
+.ph small{font-weight:400;color:var(--mute)}
+#list{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;max-height:560px;overflow:auto}
+@media(max-width:800px){#list{max-height:300px;grid-template-columns:repeat(3,1fr)}}
+.card{border:1.5px solid var(--line);border-radius:10px;padding:6px;background:#fff;color:#1d1b2e;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none}
+.card img{width:100%;aspect-ratio:1;object-fit:contain;display:block;pointer-events:none}
+.card span{display:block;font-size:12px;line-height:1.25;margin-top:4px}
+.card em{font-style:normal;color:#6b6880;font-size:12px}
+.empty{grid-column:1/-1;color:var(--mute);font-size:14px;padding:18px 6px;text-align:center}
+#board{position:relative;height:560px;overflow:hidden;border-radius:10px;border:1.5px dashed var(--line);background-image:radial-gradient(var(--dot) 1.2px,transparent 1.2px);background-size:22px 22px;touch-action:none}
+@media(max-width:800px){#board{height:420px}}
+#hint{position:absolute;inset:0;display:grid;place-items:center;text-align:center;color:var(--mute);padding:20px;pointer-events:none}
+.piece{position:absolute;width:150px;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none}
+.piece img{width:100%;display:block;pointer-events:none;border-radius:6px;box-shadow:0 6px 14px rgba(20,20,40,.25)}
+.piece.sel{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
+.piece .x{position:absolute;top:-10px;right:-10px;width:26px;height:26px;padding:0;border-radius:50%;line-height:1;display:none;background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.piece.sel .x{display:block}
+#ghost{position:fixed;width:90px;pointer-events:none;opacity:.9;z-index:50;display:none;transform:translate(-50%,-50%);border-radius:6px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Outfit board</h1>
+  <p class="sub">Paste a brand’s website link, pick pieces from its store, and drag them together into one look.</p>
+  <form id="f">
+    <input type="text" id="url" placeholder="Paste a store link, e.g. brandname.com" aria-label="Store link" autocomplete="off">
+    <button class="go" id="go" type="submit">Get pieces</button>
+  </form>
+  <p class="note" id="note">Works with Shopify stores. Add pieces from as many brands as you like.</p>
+  <div class="grid">
+    <section class="panel">
+      <p class="ph"><span>Pieces</span><small id="count">0 found</small></p>
+      <div id="list"><div class="empty">Paste a link above to see a store’s pieces here.</div></div>
+    </section>
+    <section class="panel">
+      <p class="ph"><span>Your board</span><button id="clear" type="button">Clear board</button></p>
+      <div id="board"><div id="hint">Drag pieces here, or tap a piece to add it.<br>Drag on the board to arrange.</div></div>
+    </section>
+  </div>
+</div>
+<img id="ghost" alt="">
+<script>
+(function(){
+var list=document.getElementById('list'),board=document.getElementById('board'),hint=document.getElementById('hint'),
+    ghost=document.getElementById('ghost'),note=document.getElementById('note'),count=document.getElementById('count'),
+    go=document.getElementById('go'),z=1,sel=null,shown=0;
+
+document.getElementById('f').addEventListener('submit',function(e){
+  e.preventDefault();
+  var v=document.getElementById('url').value.trim();
+  if(!v){ note.textContent='Paste a store link first.'; return; }
+  go.disabled=true; count.textContent='Scanning…'; note.textContent='Fetching pieces…';
+  fetch('/api/products?url='+encodeURIComponent(v)).then(function(r){
+    return r.json().then(function(d){ if(!r.ok) throw new Error(d.error||'Something went wrong.'); return d; });
+  }).then(function(d){
+    list.innerHTML=''; shown=0;
+    d.products.forEach(function(p){ addCard(p); });
+    count.textContent=d.products.length+' found';
+    note.textContent='Showing pieces from '+d.store+'. Paste another link to add more brands.';
+  }).catch(function(err){
+    count.textContent='0 found'; note.textContent=err.message;
+  }).then(function(){ go.disabled=false; });
+});
+
+function addCard(p){
+  var c=document.createElement('div'); c.className='card'; c.setAttribute('role','button'); c.tabIndex=0;
+  c.innerHTML='<img alt="" referrerpolicy="no-referrer" loading="lazy"><span></span><em></em>';
+  var im=c.querySelector('img'); im.src=p.image; im.alt=p.title;
+  c.querySelector('span').textContent=p.title; c.querySelector('em').textContent=p.price?('$'+p.price):'';
+  c.addEventListener('keydown',function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); place(p,60+Math.random()*100,40+Math.random()*100); } });
+  c.addEventListener('pointerdown',function(e){
+    var sx=e.clientX,sy=e.clientY,moved=false; c.setPointerCapture(e.pointerId);
+    function mv(ev){
+      if(!moved&&Math.hypot(ev.clientX-sx,ev.clientY-sy)>6){ moved=true; ghost.src=p.image; ghost.style.display='block'; }
+      if(moved){ ghost.style.left=ev.clientX+'px'; ghost.style.top=ev.clientY+'px'; }
+    }
+    function up(ev){
+      c.removeEventListener('pointermove',mv); c.removeEventListener('pointerup',up); c.removeEventListener('pointercancel',up);
+      ghost.style.display='none';
+      var r=board.getBoundingClientRect();
+      if(!moved){ place(p,30+Math.random()*(Math.max(60,r.width-210)),20+Math.random()*(Math.max(60,r.height-200))); }
+      else if(ev.clientX>r.left&&ev.clientX<r.right&&ev.clientY>r.top&&ev.clientY<r.bottom){ place(p,ev.clientX-r.left-75,ev.clientY-r.top-75); }
+    }
+    c.addEventListener('pointermove',mv); c.addEventListener('pointerup',up); c.addEventListener('pointercancel',up);
+  });
+  list.appendChild(c);
+}
+
+function select(el){ if(sel) sel.classList.remove('sel'); sel=el; if(el) el.classList.add('sel'); }
+function place(p,x,y){
+  hint.style.display='none';
+  var el=document.createElement('div'); el.className='piece';
+  el.innerHTML='<img alt="" referrerpolicy="no-referrer"><button class="x" type="button" aria-label="Remove piece">×</button>';
+  var im=el.querySelector('img'); im.src=p.image; im.alt=p.title;
+  var r=board.getBoundingClientRect();
+  x=Math.max(0,Math.min(r.width-150,x)); y=Math.max(0,Math.min(r.height-150,y));
+  el.style.left=x+'px'; el.style.top=y+'px'; el.style.zIndex=++z;
+  el.querySelector('.x').addEventListener('click',function(e){ e.stopPropagation(); el.remove(); if(sel===el) sel=null; if(!board.querySelector('.piece')) hint.style.display='grid'; });
+  el.addEventListener('pointerdown',function(e){
+    if(e.target.classList.contains('x')) return;
+    select(el); el.style.zIndex=++z; el.setPointerCapture(e.pointerId);
+    var ox=e.clientX-el.offsetLeft,oy=e.clientY-el.offsetTop;
+    function mv(ev){
+      var b=board.getBoundingClientRect();
+      el.style.left=Math.max(-40,Math.min(b.width-110,ev.clientX-ox))+'px';
+      el.style.top=Math.max(-40,Math.min(b.height-110,ev.clientY-oy))+'px';
+    }
+    function up(){ el.removeEventListener('pointermove',mv); el.removeEventListener('pointerup',up); el.removeEventListener('pointercancel',up); }
+    el.addEventListener('pointermove',mv); el.addEventListener('pointerup',up); el.addEventListener('pointercancel',up);
+  });
+  board.appendChild(el); select(el);
+}
+board.addEventListener('pointerdown',function(e){ if(e.target===board||e.target===hint) select(null); });
+document.getElementById('clear').addEventListener('click',function(){
+  board.querySelectorAll('.piece').forEach(function(n){n.remove()}); sel=null; hint.style.display='grid';
+});
+})();
+</script>
+</body>
+</html>
