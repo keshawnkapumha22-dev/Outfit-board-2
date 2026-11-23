@@ -18,13 +18,15 @@ input[type=text]{flex:1 1 260px;min-width:0;padding:12px 14px;font:inherit;color
 input:focus,button:focus-visible{outline:2.5px solid var(--accent);outline-offset:2px}
 button{font:inherit;font-weight:600;cursor:pointer;border-radius:10px;border:1.5px solid var(--line);background:var(--panel);color:var(--ink);padding:10px 14px}
 button.go{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);padding:12px 18px}
-button:disabled{opacity:.6;cursor:wait}
+button:disabled{opacity:.5;cursor:default}
 .note{font-size:13px;color:var(--mute);min-height:20px;margin:0 0 14px}
 .grid{display:grid;grid-template-columns:300px 1fr;gap:14px;align-items:start}
 @media(max-width:800px){.grid{grid-template-columns:1fr}}
 .panel{background:var(--panel);border:1.5px solid var(--line);border-radius:14px;padding:12px}
 .ph{display:flex;justify-content:space-between;align-items:center;margin:0 0 10px;font-weight:600}
 .ph small{font-weight:400;color:var(--mute)}
+.tools{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:0 0 10px;font-size:13px;color:var(--mute)}
+.tools label{display:flex;align-items:center;gap:6px}
 #list{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;max-height:560px;overflow:auto}
 @media(max-width:800px){#list{max-height:300px;grid-template-columns:repeat(3,1fr)}}
 .card{border:1.5px solid var(--line);border-radius:10px;padding:6px;background:#fff;color:#1d1b2e;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none}
@@ -37,6 +39,7 @@ button:disabled{opacity:.6;cursor:wait}
 #hint{position:absolute;inset:0;display:grid;place-items:center;text-align:center;color:var(--mute);padding:20px;pointer-events:none}
 .piece{position:absolute;width:150px;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none}
 .piece img{width:100%;display:block;pointer-events:none;border-radius:6px;box-shadow:0 6px 14px rgba(20,20,40,.25)}
+.piece.cut img{box-shadow:none;border-radius:0;filter:drop-shadow(0 6px 8px rgba(20,20,40,.3))}
 .piece.sel{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
 .piece .x{position:absolute;top:-10px;right:-10px;width:26px;height:26px;padding:0;border-radius:50%;line-height:1;display:none;background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
 .piece.sel .x{display:block}
@@ -59,7 +62,12 @@ button:disabled{opacity:.6;cursor:wait}
     </section>
     <section class="panel">
       <p class="ph"><span>Your board</span><button id="clear" type="button">Clear board</button></p>
-      <div id="board"><div id="hint">Drag pieces here, or tap a piece to add it.<br>Drag on the board to arrange.</div></div>
+      <div class="tools">
+        <button id="cut" type="button" disabled>Remove background</button>
+        <button id="restore" type="button" disabled>Restore</button>
+        <label>Strength <input type="range" id="tol" min="15" max="80" value="40"></label>
+      </div>
+      <div id="board"><div id="hint">Drag pieces here, or tap a piece to add it.<br>Tap a piece on the board, then tap Remove background.</div></div>
     </section>
   </div>
 </div>
@@ -68,7 +76,8 @@ button:disabled{opacity:.6;cursor:wait}
 (function(){
 var list=document.getElementById('list'),board=document.getElementById('board'),hint=document.getElementById('hint'),
     ghost=document.getElementById('ghost'),note=document.getElementById('note'),count=document.getElementById('count'),
-    go=document.getElementById('go'),z=1,sel=null,shown=0;
+    go=document.getElementById('go'),cutBtn=document.getElementById('cut'),restBtn=document.getElementById('restore'),
+    tolEl=document.getElementById('tol'),z=1,sel=null;
 
 document.getElementById('f').addEventListener('submit',function(e){
   e.preventDefault();
@@ -78,7 +87,7 @@ document.getElementById('f').addEventListener('submit',function(e){
   fetch('/api/products?url='+encodeURIComponent(v)).then(function(r){
     return r.json().then(function(d){ if(!r.ok) throw new Error(d.error||'Something went wrong.'); return d; });
   }).then(function(d){
-    list.innerHTML=''; shown=0;
+    list.innerHTML='';
     d.products.forEach(function(p){ addCard(p); });
     count.textContent=d.products.length+' found';
     note.textContent='Showing pieces from '+d.store+'. Paste another link to add more brands.';
@@ -111,16 +120,23 @@ function addCard(p){
   list.appendChild(c);
 }
 
-function select(el){ if(sel) sel.classList.remove('sel'); sel=el; if(el) el.classList.add('sel'); }
+function select(el){
+  if(sel) sel.classList.remove('sel');
+  sel=el; if(el) el.classList.add('sel');
+  cutBtn.disabled=!el; restBtn.disabled=!el||!el.classList.contains('cut');
+}
 function place(p,x,y){
   hint.style.display='none';
-  var el=document.createElement('div'); el.className='piece';
+  var el=document.createElement('div'); el.className='piece'; el.dataset.src=p.image;
   el.innerHTML='<img alt="" referrerpolicy="no-referrer"><button class="x" type="button" aria-label="Remove piece">×</button>';
   var im=el.querySelector('img'); im.src=p.image; im.alt=p.title;
   var r=board.getBoundingClientRect();
   x=Math.max(0,Math.min(r.width-150,x)); y=Math.max(0,Math.min(r.height-150,y));
   el.style.left=x+'px'; el.style.top=y+'px'; el.style.zIndex=++z;
-  el.querySelector('.x').addEventListener('click',function(e){ e.stopPropagation(); el.remove(); if(sel===el) sel=null; if(!board.querySelector('.piece')) hint.style.display='grid'; });
+  el.querySelector('.x').addEventListener('click',function(e){
+    e.stopPropagation(); el.remove(); if(sel===el) select(null);
+    if(!board.querySelector('.piece')) hint.style.display='grid';
+  });
   el.addEventListener('pointerdown',function(e){
     if(e.target.classList.contains('x')) return;
     select(el); el.style.zIndex=++z; el.setPointerCapture(e.pointerId);
@@ -137,7 +153,68 @@ function place(p,x,y){
 }
 board.addEventListener('pointerdown',function(e){ if(e.target===board||e.target===hint) select(null); });
 document.getElementById('clear').addEventListener('click',function(){
-  board.querySelectorAll('.piece').forEach(function(n){n.remove()}); sel=null; hint.style.display='grid';
+  board.querySelectorAll('.piece').forEach(function(n){n.remove()}); select(null); hint.style.display='grid';
+});
+
+function cutout(src,tol){
+  return fetch('/api/image?url='+encodeURIComponent(src)).then(function(r){
+    if(!r.ok) throw new Error('Couldn’t load this photo to edit it.');
+    return r.blob();
+  }).then(function(b){ return createImageBitmap(b); }).then(function(bmp){
+    var s=Math.min(1,800/Math.max(bmp.width,bmp.height)),w=Math.max(1,Math.round(bmp.width*s)),h=Math.max(1,Math.round(bmp.height*s));
+    var cv=document.createElement('canvas'); cv.width=w; cv.height=h;
+    var cx=cv.getContext('2d',{willReadFrequently:true}); cx.drawImage(bmp,0,0,w,h);
+    var im=cx.getImageData(0,0,w,h),d=im.data;
+    var cs=[0,(w-1)*4,(h-1)*w*4,((h-1)*w+w-1)*4],R=0,G=0,B=0,i;
+    for(i=0;i<4;i++){ R+=d[cs[i]]; G+=d[cs[i]+1]; B+=d[cs[i]+2]; }
+    R/=4; G/=4; B/=4;
+    for(i=0;i<4;i++){
+      if(Math.hypot(d[cs[i]]-R,d[cs[i]+1]-G,d[cs[i]+2]-B)>45) throw new Error('This photo’s background isn’t plain enough to remove. Try a different piece.');
+    }
+    var T=tol*1.5,bg=new Uint8Array(w*h),st=new Int32Array(w*h),sp=0,x,y;
+    function near(p){ var k=p*4; return Math.hypot(d[k]-R,d[k+1]-G,d[k+2]-B)<=T; }
+    function push(p){ if(!bg[p]&&near(p)){ bg[p]=1; st[sp++]=p; } }
+    for(x=0;x<w;x++){ push(x); push((h-1)*w+x); }
+    for(y=0;y<h;y++){ push(y*w); push(y*w+w-1); }
+    while(sp){
+      var p=st[--sp],px=p%w,py=(p-px)/w;
+      if(px>0)push(p-1); if(px<w-1)push(p+1); if(py>0)push(p-w); if(py<h-1)push(p+w);
+    }
+    var x0=w,y0=h,x1=-1,y1=-1;
+    for(y=0;y<h;y++){ for(x=0;x<w;x++){
+      var q=y*w+x;
+      if(bg[q]){ d[q*4+3]=0; continue; }
+      var edge=(x>0&&bg[q-1])||(x<w-1&&bg[q+1])||(y>0&&bg[q-w])||(y<h-1&&bg[q+w]);
+      if(edge) d[q*4+3]=170;
+      if(x<x0)x0=x; if(x>x1)x1=x; if(y<y0)y0=y; if(y>y1)y1=y;
+    } }
+    if(x1<0) throw new Error('Nothing was left after removing the background. Try a lower Strength.');
+    cx.putImageData(im,0,0);
+    var cw=x1-x0+1,ch=y1-y0+1,out=document.createElement('canvas'); out.width=cw; out.height=ch;
+    out.getContext('2d').drawImage(cv,x0,y0,cw,ch,0,0,cw,ch);
+    return new Promise(function(ok,no){
+      out.toBlob(function(bl){ if(bl) ok(URL.createObjectURL(bl)); else no(new Error('Couldn’t save the result.')); },'image/png');
+    });
+  });
+}
+
+cutBtn.addEventListener('click',function(){
+  if(!sel) return;
+  var el=sel,im=el.querySelector('img');
+  cutBtn.disabled=true; cutBtn.textContent='Working…'; note.textContent='Removing background…';
+  cutout(el.dataset.src,+tolEl.value).then(function(url){
+    if(el._url) URL.revokeObjectURL(el._url);
+    el._url=url; im.src=url; el.classList.add('cut');
+    note.textContent='Done. Not right? Tap Restore, change Strength, and try again.';
+  }).catch(function(err){
+    note.textContent=(err&&err.message)||'Couldn’t remove the background.';
+  }).then(function(){ cutBtn.textContent='Remove background'; select(sel); });
+});
+restBtn.addEventListener('click',function(){
+  if(!sel) return;
+  var el=sel; el.querySelector('img').src=el.dataset.src; el.classList.remove('cut');
+  if(el._url){ URL.revokeObjectURL(el._url); el._url=null; }
+  select(el);
 });
 })();
 </script>
