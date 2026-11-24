@@ -56,5 +56,182 @@ footer .W{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}foo
 .chip{flex:none;white-space:nowrap;padding:7px 13px;border:none;background:transparent;color:var(--mute)}.chip small{opacity:.55;margin-left:5px;font-weight:400}.chip.on{background:var(--ink);color:var(--bg)}
 #list{flex:1;min-height:0;overflow:auto;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;align-content:start;padding:2px 0 10px;-webkit-overflow-scrolling:touch}
 .card{min-width:0;cursor:grab;touch-action:pan-y;user-select:none;-webkit-user-select:none}
-.card .t{background:var(--tile);border-radius:20px;padding:12px;box-shadow:0 1px 2px rgba(18,20,43,.06);transition:transform .15s,box-shadow .15s}
-.card:active .t{transform:scale(.97)
+.card .t{background:var(--tile);border-radius:20px;padding:12px;box-shadow:0 1px 2px rgba(18,20,43,.06);transition:transform .15s}
+.card:active .t{transform:scale(.97)}.card img{width:100%;aspect-ratio:1;object-fit:contain;display:block;pointer-events:none;-webkit-user-drag:none}
+.card span{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-size:13px;font-weight:600;line-height:1.25;margin:8px 4px 0}
+.card em{display:block;font-style:normal;color:var(--mute);font-size:12px;margin:2px 4px 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.empty{grid-column:1/-1;color:var(--mute);font-size:14px;text-align:center;padding:30px 10px}
+#popen{position:fixed;left:12px;top:calc(64px + env(safe-area-inset-top,0px));z-index:20}
+#note{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);max-width:88vw;background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:999px;font-size:13px;z-index:60;opacity:0;transition:opacity .2s;pointer-events:none;text-align:center}
+#ghost{position:fixed;left:0;top:0;pointer-events:none;z-index:70;display:none;will-change:transform;filter:drop-shadow(0 18px 22px rgba(18,20,43,.3))}
+@media(max-width:700px){#panel{left:8px;right:8px;top:auto;bottom:8px;width:auto;max-width:none;height:46vh}#popen{top:auto;bottom:8px;left:8px}#list{grid-template-columns:repeat(3,minmax(0,1fr))}#who{display:none}}
+</style></head><body>
+<div id="home">
+<div class="W"><div id="hnav"><a class="logo" href="#">Steez<i>.</i></a><a class="cta" href="#board" style="padding:10px 20px">Start designing</a></div></div>
+<header class="hero"><div class="W"><h1>Build outfits from <mark>independent</mark> brands</h1>
+<p>Paste a brand’s website, pick its pieces, and drag them together on a big board to see the whole look.</p><a class="cta" href="#board">Start designing</a></div></header>
+<section class="sec"><div class="W"><h2>How it works</h2><p>From a brand’s website to a finished look in three steps.</p>
+<div class="g3"><div class="box"><b class="n">1</b><h3>Paste a link</h3><p>Add any brand’s website and we pull in its pieces.</p></div>
+<div class="box"><b class="n">2</b><h3>Pick your pieces</h3><p>Browse by brand and category, or search for exactly what you want.</p></div>
+<div class="box"><b class="n">3</b><h3>Build your look</h3><p>Drag pieces onto the board, zoom in close, and mix brands together.</p></div></div></div></section>
+<section class="sec"><div class="W"><h2>Made for creating</h2><p>Everything you need to put outfits together, without the clutter.</p>
+<div class="g4"><div class="box"><h3>A big, zoomable board</h3><p>Pinch or scroll to zoom in on the details, then zoom out to see the whole outfit.</p></div>
+<div class="box"><h3>Backgrounds removed for you</h3><p>Pieces land on the board clean, so they sit together like a real outfit.</p></div>
+<div class="box"><h3>Sorted by category</h3><p>T-shirts, pants, jackets, hats, and shoes, for every brand you add.</p></div>
+<div class="box"><h3>Saved to your account</h3><p>Sign in and your board is there on every device.</p></div></div></div></section>
+<section class="sec"><div class="W"><h2>Built for independent brands</h2><p>Small labels deserve to be found and styled. Steez is where people discover them and put them together, and every piece links back to the brand that made it.</p></div></section>
+<div class="W"><div class="band"><h2>Ready to design your first look?</h2><p>It’s free to start, and your board is waiting.</p><a class="cta" href="#board">Start designing</a></div></div>
+<footer><div class="W"><p>Steez is a tool for planning outfits. Product photos and names belong to their brands, and shop links lead to each brand’s own website.</p><span>© 2026 Steez</span></div></footer>
+</div>
+<div id="app" hidden>
+<div id="top"><button id="menuBtn" aria-label="Menu">☰</button><span class="logo">Steez<i>.</i></span><span class="gr"></span><span id="who"></span>
+<button id="saveBtn">Save</button><button id="loadBtn">Load</button><button id="signinBtn">Sign in</button><button id="signoutBtn">Sign out</button></div>
+<div id="shade" hidden></div>
+<nav id="menu" hidden><span class="logo">Steez<i>.</i></span><a href="#">Home</a><a href="#board" class="on">Board</a></nav>
+<form id="authForm" hidden><input type="email" id="email" placeholder="Email" autocomplete="email"><input type="password" id="pw" placeholder="Password (6+ characters)" autocomplete="current-password">
+<button class="go" type="submit">Sign in</button><button type="button" id="doSignup">Create account</button><p id="authMsg"></p></form>
+<div id="board"><div id="world"></div><div id="hint">Drag pieces onto the board, or tap them.<br>Pinch or scroll to zoom, drag empty space to move.</div></div>
+<div id="zoom"><button id="zin" aria-label="Zoom in">+</button><button id="zout" aria-label="Zoom out">−</button><button id="zfit" aria-label="Reset zoom">⟲</button></div>
+<aside id="panel"><div class="ph"><b>Pieces</b><button id="pclose">Hide</button></div>
+<form id="f"><input id="url" placeholder="Brand website, e.g. brandname.com" aria-label="Brand website" autocomplete="off"><button class="go" id="go">Add</button></form>
+<div id="rails" hidden><input id="q" placeholder="Search pieces" aria-label="Search"><div class="rail" id="brandRail"></div><div class="rail" id="catRail"></div></div>
+<div id="list"></div></aside>
+<button id="popen" hidden>Pieces</button><div id="note"></div></div>
+<img id="ghost" alt="">
+<script>
+(()=>{
+const $=i=>document.getElementById(i),SB='https://rskszcsamcarsghqzotn.supabase.co',KEY='sb_publishable_Vl2-ruU_Y3RI_fErSfaG6Q__3jZrBio',PW=300;
+const board=$('board'),world=$('world'),panel=$('panel'),list=$('list'),ghost=$('ghost'),note=$('note');
+let session=null,boardId=null,brands=[],aB='all',aC='all',z=1,sel=null,V={s:1,x:0,y:0};
+try{session=JSON.parse(localStorage.getItem('ob_session')||'null')}catch(e){}
+const say=t=>{note.textContent=t;note.style.opacity=1;clearTimeout(say.t);say.t=setTimeout(()=>note.style.opacity=0,5000)};
+const sz=(u,w)=>u.includes('cdn.shopify.com')?u+(u.includes('?')?'&':'?')+'width='+w:u;
+const route=()=>{const b=location.hash==='#board';$('home').hidden=b;$('app').hidden=!b;$('menu').hidden=$('shade').hidden=true;scrollTo(0,0);if(b)render()};
+addEventListener('hashchange',route);
+['gesturestart','gesturechange'].forEach(g=>document.addEventListener(g,e=>e.preventDefault()));
+const setS=s=>{session=s;try{s?localStorage.setItem('ob_session',JSON.stringify(s)):localStorage.removeItem('ob_session')}catch(e){}};
+const toS=d=>({access_token:d.access_token,refresh_token:d.refresh_token,expires_at:Math.floor(Date.now()/1000)+(d.expires_in||3600),email:(d.user&&d.user.email)||''});
+const authCall=(p,b)=>fetch(SB+'/auth/v1/'+p,{method:'POST',headers:{apikey:KEY,'Content-Type':'application/json'},body:JSON.stringify(b)}).then(r=>r.json().then(d=>{if(!r.ok)throw new Error(d.msg||d.error_description||d.message||'Something went wrong.');return d}));
+const token=()=>{if(!session)return Promise.reject(new Error('Sign in first.'));if(session.expires_at-60>Date.now()/1000)return Promise.resolve(session.access_token);
+  return authCall('token?grant_type=refresh_token',{refresh_token:session.refresh_token}).then(d=>{const s=toS(d);if(!s.email)s.email=session.email;setS(s);return s.access_token}).catch(()=>{setS(null);auth();throw new Error('Your sign-in expired. Please sign in again.')})};
+const rest=(m,p,b,x)=>token().then(t=>fetch(SB+'/rest/v1/'+p,{method:m,headers:Object.assign({apikey:KEY,Authorization:'Bearer '+t,'Content-Type':'application/json'},x||{}),body:b?JSON.stringify(b):undefined})).then(r=>r.status===204?null:r.json().then(d=>{if(!r.ok)throw new Error(d.message||'Couldn’t reach your saved boards.');return d}));
+const auth=()=>{const on=!!session;$('who').textContent=on?session.email:'';$('signinBtn').hidden=on;$('signoutBtn').hidden=!on;$('loadBtn').hidden=!on;if(on)$('authForm').hidden=true};
+const openAuth=m=>{$('authForm').hidden=false;$('authMsg').textContent=m||'';$('email').focus()};
+$('signinBtn').onclick=()=>{$('authForm').hidden=!$('authForm').hidden};
+$('menuBtn').onclick=()=>{$('menu').hidden=$('shade').hidden=false};$('shade').onclick=()=>{$('menu').hidden=$('shade').hidden=true};
+const creds=()=>{const e=$('email').value.trim(),p=$('pw').value;if(!e||p.length<6){$('authMsg').textContent='Enter your email and a password of 6+ characters.';return null}return{email:e,password:p}};
+const after=d=>{setS(toS(d));auth();$('pw').value='';if(!world.querySelector('.piece'))loadBoard()};
+$('authForm').onsubmit=e=>{e.preventDefault();const c=creds();if(!c)return;$('authMsg').textContent='Signing in…';authCall('token?grant_type=password',c).then(after).catch(x=>$('authMsg').textContent=x.message)};
+$('doSignup').onclick=()=>{const c=creds();if(!c)return;$('authMsg').textContent='Creating your account…';authCall('signup',c).then(d=>d.access_token?after(d):$('authMsg').textContent='Account created. Confirm it by email, then sign in.').catch(x=>$('authMsg').textContent=x.message)};
+$('signoutBtn').onclick=()=>{setS(null);boardId=null;auth();say('Signed out.')};
+const apply=()=>world.style.transform=`translate3d(${V.x}px,${V.y}px,0) scale(${V.s})`;
+const mid=()=>{const r=board.getBoundingClientRect();return[r.left+r.width/2,r.top+r.height/2]};
+const zoomAt=(cx,cy,f)=>{const r=board.getBoundingClientRect(),ns=Math.min(4,Math.max(.15,V.s*f)),k=ns/V.s,px=cx-r.left,py=cy-r.top;V.x=px-(px-V.x)*k;V.y=py-(py-V.y)*k;V.s=ns;apply()};
+$('zin').onclick=()=>zoomAt(...mid(),1.3);$('zout').onclick=()=>zoomAt(...mid(),.77);$('zfit').onclick=()=>{V={s:1,x:0,y:0};apply()};
+board.addEventListener('wheel',e=>{e.preventDefault();if(e.ctrlKey||e.metaKey||Math.abs(e.deltaY)>Math.abs(e.deltaX))zoomAt(e.clientX,e.clientY,Math.exp(-e.deltaY*(e.ctrlKey?.01:.0015)));else{V.x-=e.deltaX;apply()}},{passive:false});
+const toW=(cx,cy)=>{const r=board.getBoundingClientRect();return{x:(cx-r.left-V.x)/V.s,y:(cy-r.top-V.y)/V.s}};
+const P=new Map();let pan=null,pin=null;
+board.addEventListener('pointerdown',e=>{if(e.target.closest('.piece'))return;board.setPointerCapture(e.pointerId);P.set(e.pointerId,{x:e.clientX,y:e.clientY});select(null);
+  if(P.size===1)pan={x:e.clientX-V.x,y:e.clientY-V.y};else if(P.size===2){pan=null;const[a,b]=[...P.values()];pin=Math.hypot(a.x-b.x,a.y-b.y)}});
+board.addEventListener('pointermove',e=>{if(!P.has(e.pointerId))return;P.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  if(P.size===2&&pin){const[a,b]=[...P.values()],d=Math.hypot(a.x-b.x,a.y-b.y);zoomAt((a.x+b.x)/2,(a.y+b.y)/2,d/pin);pin=d}
+  else if(pan&&P.size===1){V.x=e.clientX-pan.x;V.y=e.clientY-pan.y;apply()}});
+const endP=e=>{P.delete(e.pointerId);pin=null;pan=P.size===1?(()=>{const p=[...P.values()][0];return{x:p.x-V.x,y:p.y-V.y}})():null};
+board.addEventListener('pointerup',endP);board.addEventListener('pointercancel',endP);
+const select=el=>{if(sel)sel.classList.remove('sel');sel=el;if(el)el.classList.add('sel')};
+const mv=(el,x,y)=>{el._x=x;el._y=y;el.style.transform=`translate3d(${x}px,${y}px,0)`};
+function place(p,x,y){
+  $('hint').hidden=true;
+  const el=document.createElement('div');el.className='piece busy';el.dataset.src=p.image;el.dataset.title=p.title||'';
+  el.innerHTML='<img alt="" referrerpolicy="no-referrer" decoding="async"><button class="r" type="button" aria-label="Switch between original and cutout">↺</button><button class="x" type="button" aria-label="Remove">×</button>';
+  const im=el.querySelector('img');im.src=sz(p.image,700);im.alt=p.title||'';
+  mv(el,x,y);el.style.zIndex=++z;
+  el.querySelector('.x').onclick=e=>{e.stopPropagation();el._u&&URL.revokeObjectURL(el._u);el.remove();if(sel===el)sel=null;if(!world.querySelector('.piece'))$('hint').hidden=false};
+  el.querySelector('.r').onclick=e=>{e.stopPropagation();if(!el._u)return;el._off=!el._off;im.src=el._off?sz(p.image,700):el._u};
+  el.addEventListener('pointerdown',e=>{if(e.target.closest('button'))return;e.preventDefault();select(el);el.style.zIndex=++z;el.setPointerCapture(e.pointerId);el.classList.add('drag');
+    const sx=e.clientX,sy=e.clientY,ox=el._x,oy=el._y;let raf=0,lx=sx,ly=sy;
+    const m=v=>{lx=v.clientX;ly=v.clientY;if(!raf)raf=requestAnimationFrame(()=>{raf=0;mv(el,ox+(lx-sx)/V.s,oy+(ly-sy)/V.s)})};
+    const up=()=>{el.classList.remove('drag');el.removeEventListener('pointermove',m);el.removeEventListener('pointerup',up);el.removeEventListener('pointercancel',up)};
+    el.addEventListener('pointermove',m);el.addEventListener('pointerup',up);el.addEventListener('pointercancel',up)});
+  world.appendChild(el);select(el);
+  cutout(p.image).then(u=>{el._u=u;im.src=u;el.classList.add('has')}).catch(e=>say(e.message)).then(()=>el.classList.remove('busy'));
+  return el;
+}
+const clearBoard=()=>{world.querySelectorAll('.piece').forEach(n=>{n._u&&URL.revokeObjectURL(n._u);n.remove()});select(null);$('hint').hidden=false};
+const center=()=>{const[cx,cy]=mid(),w=toW(cx,cy);return{x:w.x-PW/2+(Math.random()-.5)*160/V.s,y:w.y-PW/2+(Math.random()-.5)*160/V.s}};
+$('saveBtn').onclick=()=>{
+  if(!session){openAuth('Sign in or create an account to save your board.');return}
+  const ps=[...world.querySelectorAll('.piece')].sort((a,b)=>a.style.zIndex-b.style.zIndex);
+  if(!ps.length){say('Add some pieces first.');return}
+  const items=ps.map(e=>({src:e.dataset.src,title:e.dataset.title,x:e._x,y:e._y,cut:true,tol:40}));say('Saving…');
+  (boardId?rest('PATCH','boards?id=eq.'+boardId,{items,updated_at:new Date().toISOString()},{Prefer:'return=minimal'}):rest('POST','boards',{items},{Prefer:'return=representation'}).then(d=>{if(d&&d[0])boardId=d[0].id}))
+   .then(()=>say('Saved. It will be here next time you sign in.')).catch(e=>say(e.message));
+};
+const loadBoard=()=>{say('Loading your board…');return rest('GET','boards?select=id,items&order=updated_at.desc&limit=1').then(d=>{
+  if(!d||!d.length){say('No saved board yet.');return}
+  boardId=d[0].id;clearBoard();(d[0].items||[]).forEach(i=>place({image:i.src,title:i.title},i.x,i.y));select(null);say('Board loaded.')}).catch(e=>say(e.message))};
+$('loadBtn').onclick=loadBoard;
+const CATS=[['tees','T-shirts & tops'],['hoodies','Hoodies & sweaters'],['jackets','Jackets'],['pants','Pants'],['shorts','Shorts'],['hats','Hats'],['shoes','Shoes'],['acc','Accessories'],['other','Other']];
+const RX=[['shoes',/sneaker|shoe|boot|sandal|slide|loafer|trainer|footwear|clog/],['hats',/\b(hat|hats|cap|caps|beanie|visor|snapback|headwear|balaclava)\b/],['shorts',/\bshorts\b/],['pants',/pant|jean|denim|trouser|cargo|jogger|legging|chino|bottoms/],['jackets',/jacket|coat|parka|puffer|windbreaker|bomber|vest|outerwear|anorak|blazer|shell/],['hoodies',/hoodie|sweatshirt|crewneck|crew neck|pullover|fleece|jumper|sweater|cardigan|zip-up|zip up/],['tees',/t-shirt|\btees?\b|shirt|\btops?\b|tank|polo|jersey|long sleeve|longsleeve|blouse|bodysuit/],['acc',/\b(bag|bags|tote|backpack|belt|scarf|glove|gloves|sock|socks|wallet|jewelry|jewellery|chain|necklace|ring|bracelet|sticker|keychain|accessory|accessories|watch|sunglasses|mask|towel|pin|patch)\b/]];
+const catOf=s=>{s=(s||'').toLowerCase();if(!s)return'';for(const[k,r]of RX)if(r.test(s))return k;return''};
+const chip=(l,n,on,fn,rm)=>{const b=document.createElement('button');b.type='button';b.className='chip'+(on?' on':'');b.append(l);
+  if(n!=null){const s=document.createElement('small');s.textContent=n;b.append(s)}
+  if(rm){const x=document.createElement('span');x.textContent=' ×';x.onclick=e=>{e.stopPropagation();rm()};b.append(x)}b.onclick=fn;return b};
+function render(){
+  list.innerHTML='';
+  if(!brands.length){$('rails').hidden=true;list.innerHTML='<div class="empty">Add a brand’s website above to see its pieces here.</div>';return}
+  $('rails').hidden=false;let all=[],tot=0;brands.forEach(b=>{tot+=b.ps.length;if(aB==='all'||aB===b.host)all=all.concat(b.ps)});
+  const br=$('brandRail');br.innerHTML='';br.append(chip('All brands',tot,aB==='all',()=>{aB='all';aC='all';render()}));
+  brands.forEach(b=>br.append(chip(b.host,b.ps.length,aB===b.host,()=>{aB=b.host;aC='all';render()},()=>{brands=brands.filter(x=>x.host!==b.host);if(aB===b.host){aB='all';aC='all'}render()})));
+  const n={};all.forEach(p=>n[p.cat]=(n[p.cat]||0)+1);if(aC!=='all'&&!n[aC])aC='all';
+  const cr=$('catRail');cr.innerHTML='';cr.append(chip('All',all.length,aC==='all',()=>{aC='all';render()}));
+  CATS.forEach(c=>{if(n[c[0]])cr.append(chip(c[1],n[c[0]],aC===c[0],()=>{aC=c[0];render()}))});
+  const q=$('q').value.trim().toLowerCase(),v=all.filter(p=>(aC==='all'||p.cat===aC)&&(!q||p.title.toLowerCase().includes(q)));
+  v.forEach(card);if(!v.length)list.innerHTML='<div class="empty">No pieces match.</div>';
+}
+$('q').oninput=render;
+$('f').onsubmit=e=>{e.preventDefault();const v=$('url').value.trim();if(!v){say('Enter a brand’s website first.');return}
+  $('go').disabled=true;say('Fetching pieces…');
+  fetch('/api/products?url='+encodeURIComponent(v)).then(r=>r.json().then(d=>{if(!r.ok)throw new Error(d.error||'Something went wrong.');return d})).then(d=>{
+    const ps=d.products.map(p=>(p.brand=d.store,p.cat=catOf(p.type)||catOf(p.title)||catOf(p.tags)||'other',p));
+    brands=brands.filter(b=>b.host!==d.store);brands.push({host:d.store,ps});aB=d.store;aC='all';$('q').value='';$('url').value='';render();say('Added '+d.store+' ('+ps.length+' pieces).');
+  }).catch(x=>say(x.message)).then(()=>$('go').disabled=false)};
+function card(p){
+  const c=document.createElement('div');c.className='card';c.innerHTML='<div class="t"><img alt="" referrerpolicy="no-referrer" loading="lazy" decoding="async"></div><span></span><em></em>';
+  const im=c.querySelector('img');im.src=sz(p.image,360);im.alt=p.title;c.querySelector('span').textContent=p.title;c.querySelector('em').textContent=p.price?'$'+p.price:p.brand;
+  c.addEventListener('pointerdown',e=>{const sx=e.clientX,sy=e.clientY;let m=false,raf=0,lx=sx,ly=sy;
+    const draw=()=>{raf=0;ghost.style.transform=`translate3d(${lx}px,${ly}px,0) translate(-50%,-50%) rotate(-2deg)`};
+    const mvv=v=>{lx=v.clientX;ly=v.clientY;
+      if(!m&&Math.abs(lx-sx)>10&&Math.abs(lx-sx)>Math.abs(ly-sy)*.6){m=true;ghost.src=sz(p.image,700);ghost.style.width=Math.min(420,PW*V.s)+'px';ghost.style.display='block';panel.classList.add('dim')}
+      if(m&&!raf)raf=requestAnimationFrame(draw)};
+    const done=()=>{document.removeEventListener('pointermove',mvv);document.removeEventListener('pointerup',up);document.removeEventListener('pointercancel',off);ghost.style.display='none';panel.classList.remove('dim')};
+    const off=()=>done();
+    const up=v=>{done();
+      if(!m){if(Math.hypot(v.clientX-sx,v.clientY-sy)<10){const q=center();place(p,q.x,q.y)}return}
+      const r=board.getBoundingClientRect(),pr=panel.getBoundingClientRect(),inP=!panel.hidden&&v.clientX>pr.left&&v.clientX<pr.right&&v.clientY>pr.top&&v.clientY<pr.bottom;
+      if(v.clientX>r.left&&v.clientX<r.right&&v.clientY>r.top&&v.clientY<r.bottom&&!inP){const w=toW(v.clientX,v.clientY),H=ghost.naturalWidth?PW*ghost.naturalHeight/ghost.naturalWidth:PW;place(p,w.x-PW/2,w.y-H/2)}};
+    document.addEventListener('pointermove',mvv);document.addEventListener('pointerup',up);document.addEventListener('pointercancel',off)});
+  list.appendChild(c);
+}
+$('pclose').onclick=()=>{panel.hidden=true;$('popen').hidden=false};$('popen').onclick=()=>{panel.hidden=false;$('popen').hidden=true};
+const cutout=src=>fetch('/api/image?url='+encodeURIComponent(sz(src,1400))).then(r=>{if(!r.ok)throw new Error('Couldn’t load a photo to remove its background.');return r.blob()}).then(createImageBitmap).then(bmp=>{
+  const s=Math.min(1,1400/Math.max(bmp.width,bmp.height)),w=Math.max(1,Math.round(bmp.width*s)),h=Math.max(1,Math.round(bmp.height*s));
+  const cv=document.createElement('canvas');cv.width=w;cv.height=h;const cx=cv.getContext('2d',{willReadFrequently:true});cx.drawImage(bmp,0,0,w,h);
+  const im=cx.getImageData(0,0,w,h),d=im.data,cs=[0,(w-1)*4,(h-1)*w*4,((h-1)*w+w-1)*4];let R=0,G=0,B=0;
+  cs.forEach(k=>{R+=d[k];G+=d[k+1];B+=d[k+2]});R/=4;G/=4;B/=4;
+  if(cs.some(k=>Math.hypot(d[k]-R,d[k+1]-G,d[k+2]-B)>20))throw new Error('One photo has a busy background, so it stays as is.');
+  const T=14,bg=new Uint8Array(w*h),st=new Int32Array(w*h);let sp=0,gone=0;
+  const push=p=>{if(!bg[p]){const k=p*4;if(Math.hypot(d[k]-R,d[k+1]-G,d[k+2]-B)<=T){bg[p]=1;gone++;st[sp++]=p}}};
+  for(let x=0;x<w;x++){push(x);push((h-1)*w+x)}for(let y=0;y<h;y++){push(y*w);push(y*w+w-1)}
+  while(sp){const p=st[--sp],px=p%w,py=(p-px)/w;if(px>0)push(p-1);if(px<w-1)push(p+1);if(py>0)push(p-w);if(py<h-1)push(p+w)}
+  if(w*h-gone<w*h*.14||gone<w*h*.1)throw new Error('Kept one photo as is, since its background couldn’t be removed cleanly.');
+  let x0=w,y0=h,x1=-1,y1=-1;
+  for(let y=0;y<h;y++)for(let x=0;x<w;x++){const q=y*w+x;if(bg[q]){d[q*4+3]=0;continue}
+    if((x>0&&bg[q-1])||(x<w-1&&bg[q+1])||(y>0&&bg[q-w])||(y<h-1&&bg[q+w]))d[q*4+3]=200;
+    if(x<x0)x0=x;if(x>x1)x1=x;if(y<y0)y0=y;if(y>y1)y1=y}
+  cx.putImageData(im,0,0);const cw=x1-x0+1,ch=y1-y0+1,o=document.createElement('canvas');o.width=cw;o.height=ch;o.getContext('2d').drawImage(cv,x0,y0,cw,ch,0,0,cw,ch);
+  return new Promise((ok,no)=>o.toBlob(b=>b?ok(URL.createObjectURL(b)):no(new Error('Couldn’t save the result.')),'image/png'));
+});
+auth();route();if(session&&location.hash==='#board')loadBoard();
+})();
+</script></body></html>
