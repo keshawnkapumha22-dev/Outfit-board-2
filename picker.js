@@ -28,6 +28,35 @@ fi.onchange=async()=>{
   if(MY.length&&f){document.getElementById('url').value='steez:photos';f.requestSubmit()}
 };
 
+/* gradient-aware background cleanup: paints the background pure white so the cutout can finish the job */
+async function clean(bmp){
+  const s=Math.min(1,1200/Math.max(bmp.width,bmp.height)),w=Math.max(1,Math.round(bmp.width*s)),h=Math.max(1,Math.round(bmp.height*s));
+  const c=document.createElement('canvas');c.width=w;c.height=h;
+  const x=c.getContext('2d',{willReadFrequently:true});x.fillStyle='#fff';x.fillRect(0,0,w,h);x.drawImage(bmp,0,0,w,h);
+  const im=x.getImageData(0,0,w,h),d=im.data,cs=[0,(w-1)*4,(h-1)*w*4,((h-1)*w+w-1)*4];
+  let R=0,G=0,B=0;cs.forEach(k=>{R+=d[k];G+=d[k+1];B+=d[k+2]});R/=4;G/=4;B/=4;
+  if(cs.some(k=>Math.hypot(d[k]-R,d[k+1]-G,d[k+2]-B)>40))return null;
+  const bg=new Uint8Array(w*h),stk=new Int32Array(w*h);let sp=0,gone=0;
+  const ok=(p,f0)=>{if(bg[p])return;const k=p*4;if(Math.hypot(d[k]-R,d[k+1]-G,d[k+2]-B)>45)return;
+    if(f0>=0){const j=f0*4;if(Math.hypot(d[k]-d[j],d[k+1]-d[j+1],d[k+2]-d[j+2])>8)return}
+    bg[p]=1;gone++;stk[sp++]=p};
+  for(let i=0;i<w;i++){ok(i,-1);ok((h-1)*w+i,-1)}
+  for(let j=0;j<h;j++){ok(j*w,-1);ok(j*w+w-1,-1)}
+  while(sp){const p=stk[--sp],px=p%w,py=(p-px)/w;if(px>0)ok(p-1,p);if(px<w-1)ok(p+1,p);if(py>0)ok(p-w,p);if(py<h-1)ok(p+w,p)}
+  if(gone<w*h*.08||w*h-gone<w*h*.12)return null;
+  for(let p=0;p<w*h;p++)if(bg[p]){const k=p*4;d[k]=d[k+1]=d[k+2]=255}
+  x.putImageData(im,0,0);
+  return new Promise(r=>c.toBlob(r,'image/png'));
+}
+const tidy=async r=>{
+  try{
+    if(!r.ok)return r;
+    const bmp=await createImageBitmap(await r.clone().blob());
+    const out=await clean(bmp);
+    return out?new Response(out,{status:200,headers:{'Content-Type':'image/png'}}):r;
+  }catch(e){return r}
+};
+
 /* product-only photos: remember each piece's other photos, then use the first one with a plain background */
 const ALTS=new Map(),base=x=>x.split('?')[0];
 const rec=d=>{(d&&d.products||[]).forEach(p=>{if(p.alts&&p.alts.length)ALTS.set(base(p.image),p.alts)})};
@@ -77,10 +106,10 @@ window.fetch=function(u,o){
   }
   if(typeof u==='string'&&u.indexOf('/api/image?url=')===0){
     const orig=decodeURIComponent(u.slice(u.indexOf('=')+1));
-    if(orig.indexOf('data:')===0)return real(orig);
+    if(orig.indexOf('data:')===0)return real(orig).then(tidy);
     const alts=ALTS.get(base(orig));
-    if(!alts)return real(u,o);
-    return pick([orig].concat(alts.map(a=>/cdn\.shopify\.com/.test(a)&&a.indexOf('?')<0?a+'?width=1400':a)));
+    if(!alts)return real(u,o).then(tidy);
+    return pick([orig].concat(alts.map(a=>/cdn\.shopify\.com/.test(a)&&a.indexOf('?')<0?a+'?width=1400':a))).then(tidy);
   }
   return real(u,o);
 };
