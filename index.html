@@ -3,97 +3,158 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Outfit board</title>
+<title>Steez – Build outfits from independent brands</title>
+<meta name="description" content="Paste a brand’s website link, drag its pieces onto a board, and see how outfits look together.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E👕%3C/text%3E%3C/svg%3E">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;800&display=swap">
 <style>
-:root{--bg:#e8e7ef;--panel:#f6f5fa;--ink:#1d1b2e;--mute:#6b6880;--line:#cfcde0;--accent:#2f3bff;--accent-ink:#fff;--dot:#c5c3d8}
-@media (prefers-color-scheme:dark){:root{--bg:#15141f;--panel:#1e1c2d;--ink:#ecebf5;--mute:#9a97b2;--line:#34314d;--accent:#7c86ff;--accent-ink:#10101a;--dot:#34314d}}
+:root{--bg:#f6f7ff;--card:#fff;--ink:#12142b;--mute:#5f647e;--line:#e2e5f5;--accent:#2f3bff;--accent-ink:#fff;--soft:#e9ebff;--pop:#ffd84d;--dot:#d6daf0}
+@media (prefers-color-scheme:dark){:root{--bg:#0d0f1f;--card:#161933;--ink:#eef0ff;--mute:#9da3c4;--line:#272b4d;--accent:#7b85ff;--accent-ink:#0d0f1f;--soft:#1d2145;--dot:#272b4d}}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:"Bricolage Grotesque",system-ui,-apple-system,Segoe UI,sans-serif;line-height:1.45}
-.wrap{max-width:1200px;margin:0 auto;padding:20px 16px 32px}
-h1{font-size:clamp(28px,5vw,44px);font-weight:800;letter-spacing:-.03em;margin:0 0 4px;line-height:1.05}
-.sub{color:var(--mute);margin:0 0 16px;max-width:60ch}
-form{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px}
-input[type=text],input[type=email],input[type=password]{flex:1 1 220px;min-width:0;padding:12px 14px;font:inherit;color:var(--ink);background:var(--panel);border:1.5px solid var(--line);border-radius:10px}
-input:focus,button:focus-visible{outline:2.5px solid var(--accent);outline-offset:2px}
-button{font:inherit;font-weight:600;cursor:pointer;border-radius:10px;border:1.5px solid var(--line);background:var(--panel);color:var(--ink);padding:10px 14px}
-button.go{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);padding:12px 18px}
-button:disabled{opacity:.5;cursor:default}
-.bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:0 0 12px;padding:10px 12px;background:var(--panel);border:1.5px solid var(--line);border-radius:12px}
-.bar .grow{flex:1}
-#who{font-size:14px;color:var(--mute)}
-#authForm{margin:0 0 12px;padding:12px;background:var(--panel);border:1.5px solid var(--line);border-radius:12px}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Bricolage Grotesque",system-ui,-apple-system,Segoe UI,sans-serif;line-height:1.5;-webkit-font-smoothing:antialiased}
+.w{max-width:1180px;margin:0 auto;padding:0 20px}
+nav{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--bg) 85%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--line);padding-top:env(safe-area-inset-top,0px)}
+nav .w{display:flex;align-items:center;gap:10px;height:60px}
+.logo{font-weight:800;font-size:24px;letter-spacing:-.05em}
+.logo i{font-style:normal;color:var(--accent)}
+.grow{flex:1}
+#who{font-size:13px;color:var(--mute);max-width:38vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+button{font:inherit;font-weight:600;font-size:14px;cursor:pointer;border-radius:999px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);padding:9px 16px;transition:transform .12s,border-color .15s,background .15s}
+button:hover:not(:disabled){border-color:var(--ink);transform:translateY(-1px)}
+button:active:not(:disabled){transform:scale(.97)}
+button.go,a.cta{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+button:disabled{opacity:.45;cursor:default}
+input:focus,button:focus-visible,a:focus-visible{outline:2.5px solid var(--accent);outline-offset:2px}
+.hero{padding:60px 0 24px;text-align:center;background:radial-gradient(520px 260px at 85% 0%,var(--soft),transparent 70%),radial-gradient(460px 240px at 8% 12%,color-mix(in srgb,var(--pop) 30%,transparent),transparent 70%)}
+.hero h1{font-size:clamp(38px,8vw,72px);font-weight:800;letter-spacing:-.05em;line-height:.98;margin:0 auto 18px;max-width:14ch}
+mark{background:linear-gradient(transparent 60%,var(--pop) 60%);color:inherit;padding:0 .06em}
+.hero p{color:var(--mute);font-size:clamp(16px,2.4vw,20px);max-width:46ch;margin:0 auto 26px}
+a.cta{display:inline-block;text-decoration:none;font-weight:600;padding:15px 28px;border-radius:999px;transition:transform .12s}
+a.cta:hover{transform:translateY(-2px)}
+.chips{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:22px}
+.chips span{font-size:13px;font-weight:600;border:1.5px solid var(--line);background:var(--card);border-radius:999px;padding:6px 13px}
+.chips span:nth-child(odd){transform:rotate(-2deg)}
+.chips span:nth-child(even){transform:rotate(2deg)}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:36px 0 52px}
+@media(max-width:700px){.steps{grid-template-columns:1fr}}
+.step{background:var(--card);border:1.5px solid var(--line);border-radius:22px;padding:20px}
+.step b{display:grid;place-items:center;width:32px;height:32px;border-radius:50%;background:var(--pop);color:#12142b;margin-bottom:10px}
+.step h3{margin:0 0 4px;font-size:18px;letter-spacing:-.02em}
+.step p{margin:0;color:var(--mute);font-size:14px}
+h2{font-size:clamp(28px,4.5vw,40px);letter-spacing:-.04em;margin:0 0 4px;line-height:1.05}
+.lead{color:var(--mute);margin:0 0 18px}
+input[type=text],input[type=email],input[type=password]{flex:1 1 220px;min-width:0;padding:13px 18px;font:inherit;color:var(--ink);background:var(--card);border:1.5px solid var(--line);border-radius:999px}
+form{display:flex;gap:8px;flex-wrap:wrap}
+#authForm{margin:0 0 14px;padding:14px;background:var(--card);border:1.5px solid var(--line);border-radius:22px}
 #authForm[hidden]{display:none}
 #authMsg{flex-basis:100%;margin:0;font-size:13px;color:var(--mute)}
-.note{font-size:13px;color:var(--mute);min-height:20px;margin:0 0 14px}
-.grid{display:grid;grid-template-columns:300px 1fr;gap:14px;align-items:start}
-@media(max-width:800px){.grid{grid-template-columns:1fr}}
-.panel{background:var(--panel);border:1.5px solid var(--line);border-radius:14px;padding:12px}
-.ph{display:flex;justify-content:space-between;align-items:center;margin:0 0 10px;font-weight:600}
+.note{font-size:13px;color:var(--mute);min-height:20px;margin:10px 0 16px}
+.grid{display:grid;grid-template-columns:340px 1fr;gap:16px;align-items:start}
+@media(max-width:860px){.grid{grid-template-columns:1fr}}
+.panel{background:var(--card);border:1.5px solid var(--line);border-radius:26px;padding:16px;box-shadow:0 10px 30px rgba(47,59,255,.06)}
+.ph{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 12px;font-weight:600}
 .ph small{font-weight:400;color:var(--mute)}
-.tools{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:0 0 10px;font-size:13px;color:var(--mute)}
-.tools label{display:flex;align-items:center;gap:6px}
-#list{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;max-height:560px;overflow:auto}
-@media(max-width:800px){#list{max-height:300px;grid-template-columns:repeat(3,1fr)}}
-.card{border:1.5px solid var(--line);border-radius:10px;padding:6px;background:#fff;color:#1d1b2e;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none}
+.acts{display:flex;gap:6px;flex-wrap:wrap}
+.acts button,.tools button{padding:7px 13px;font-size:13px}
+.tools{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:0 0 12px;font-size:13px;color:var(--mute)}
+.tools label{display:flex;align-items:center;gap:8px}
+#q{width:100%;flex:none;padding:10px 16px;font-size:14px;margin-bottom:10px}
+.rail{display:flex;gap:6px;overflow-x:auto;padding:2px 2px 8px;margin:0 -2px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.rail::-webkit-scrollbar{display:none}
+.chip{flex:none;display:inline-flex;align-items:center;gap:6px;padding:7px 13px;font-size:13px;white-space:nowrap}
+.chip small{opacity:.65;font-weight:600}
+.chip .rm{opacity:.6;padding:0 2px;font-size:15px;line-height:1}
+.chip.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+#list{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;max-height:560px;overflow:auto;margin-top:4px}
+@media(max-width:860px){#list{max-height:340px;grid-template-columns:repeat(3,1fr)}}
+.card{border:1.5px solid var(--line);border-radius:16px;padding:8px;background:#fff;color:#12142b;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;transition:box-shadow .15s,transform .15s}
+.card:hover{box-shadow:0 8px 20px rgba(47,59,255,.15);transform:translateY(-2px)}
 .card img{width:100%;aspect-ratio:1;object-fit:contain;display:block;pointer-events:none}
-.card span{display:block;font-size:12px;line-height:1.25;margin-top:4px}
-.card em{font-style:normal;color:#6b6880;font-size:12px}
-.empty{grid-column:1/-1;color:var(--mute);font-size:14px;padding:18px 6px;text-align:center}
-#board{position:relative;height:560px;overflow:hidden;border-radius:10px;border:1.5px dashed var(--line);background-image:radial-gradient(var(--dot) 1.2px,transparent 1.2px);background-size:22px 22px;touch-action:none}
-@media(max-width:800px){#board{height:420px}}
-#hint{position:absolute;inset:0;display:grid;place-items:center;text-align:center;color:var(--mute);padding:20px;pointer-events:none}
+.card span{display:block;font-size:12px;line-height:1.25;margin-top:6px;font-weight:600}
+.card em{display:block;font-style:normal;color:#5f647e;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.empty{grid-column:1/-1;color:var(--mute);font-size:14px;padding:26px 8px;text-align:center}
+#board{position:relative;height:600px;overflow:hidden;border-radius:18px;border:1.5px solid var(--line);background-color:var(--bg);background-image:radial-gradient(var(--dot) 1.3px,transparent 1.3px);background-size:22px 22px;touch-action:none}
+@media(max-width:860px){#board{height:440px}}
+#hint{position:absolute;inset:0;display:grid;place-items:center;text-align:center;color:var(--mute);padding:20px;pointer-events:none;font-size:14px}
 .piece{position:absolute;width:150px;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none}
-.piece img{width:100%;display:block;pointer-events:none;border-radius:6px;box-shadow:0 6px 14px rgba(20,20,40,.25)}
-.piece.cut img{box-shadow:none;border-radius:0;filter:drop-shadow(0 6px 8px rgba(20,20,40,.3))}
-.piece.sel{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
-.piece .x{position:absolute;top:-10px;right:-10px;width:26px;height:26px;padding:0;border-radius:50%;line-height:1;display:none;background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.piece img{width:100%;display:block;pointer-events:none;border-radius:10px;box-shadow:0 8px 18px rgba(18,20,43,.22)}
+.piece.cut img{box-shadow:none;border-radius:0;filter:drop-shadow(0 6px 8px rgba(18,20,43,.3))}
+.piece.sel{outline:2px solid var(--accent);outline-offset:2px;border-radius:10px}
+.piece .x{position:absolute;top:-11px;right:-11px;width:28px;height:28px;padding:0;border-radius:50%;line-height:1;display:none;background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
 .piece.sel .x{display:block}
-#ghost{position:fixed;width:90px;pointer-events:none;opacity:.9;z-index:50;display:none;transform:translate(-50%,-50%);border-radius:6px}
+#ghost{position:fixed;width:90px;pointer-events:none;opacity:.9;z-index:50;display:none;transform:translate(-50%,-50%);border-radius:10px}
+footer{margin-top:64px;border-top:1px solid var(--line);padding:26px 0 calc(30px + env(safe-area-inset-bottom,0px));color:var(--mute);font-size:13px}
+footer .w{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+footer p{margin:0;max-width:62ch}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <h1>Outfit board</h1>
-  <p class="sub">Paste a brand’s website link, pick pieces from its store, and drag them together into one look.</p>
+<nav><div class="w">
+  <span class="logo">Steez<i>.</i></span>
+  <span class="grow"></span>
+  <span id="who">Not signed in</span>
+  <button id="signinBtn" type="button">Sign in</button>
+  <button id="signoutBtn" type="button">Sign out</button>
+</div></nav>
 
-  <div class="bar">
-    <span id="who">Not signed in</span>
-    <span class="grow"></span>
-    <button id="signinBtn" type="button">Sign in</button>
-    <button id="loadBtn" type="button">Load saved</button>
-    <button id="saveBtn" type="button">Save board</button>
-    <button id="signoutBtn" type="button">Sign out</button>
-  </div>
-  <form id="authForm" hidden>
-    <input type="email" id="email" placeholder="Email" aria-label="Email" autocomplete="email">
-    <input type="password" id="pw" placeholder="Password (6+ characters)" aria-label="Password" autocomplete="current-password" minlength="6">
-    <button class="go" id="doSignin" type="submit">Sign in</button>
-    <button id="doSignup" type="button">Create account</button>
-    <p id="authMsg"></p>
-  </form>
+<header class="hero w">
+  <h1>Build outfits from <mark>independent</mark> brands</h1>
+  <p>Paste a brand’s website link, drag its pieces onto a board, and see how a look comes together.</p>
+  <a class="cta" href="#app">Start building</a>
+  <div class="chips"><span>Free to start</span><span>Background removal included</span><span>Boards saved to your account</span></div>
+</header>
 
-  <form id="f">
-    <input type="text" id="url" placeholder="Paste a store link, e.g. brandname.com" aria-label="Store link" autocomplete="off">
-    <button class="go" id="go" type="submit">Get pieces</button>
-  </form>
-  <p class="note" id="note">Works with Shopify stores. Add pieces from as many brands as you like.</p>
-  <div class="grid">
-    <section class="panel">
-      <p class="ph"><span>Pieces</span><small id="count">0 found</small></p>
-      <div id="list"><div class="empty">Paste a link above to see a store’s pieces here.</div></div>
-    </section>
-    <section class="panel">
-      <p class="ph"><span>Your board</span><button id="clear" type="button">Clear board</button></p>
-      <div class="tools">
-        <button id="cut" type="button" disabled>Remove background</button>
-        <button id="restore" type="button" disabled>Restore</button>
-        <label>Strength <input type="range" id="tol" min="15" max="80" value="40"></label>
-      </div>
-      <div id="board"><div id="hint">Drag pieces here, or tap a piece to add it.<br>Tap a piece on the board, then tap Remove background.</div></div>
-    </section>
+<main class="w">
+  <div class="steps">
+    <div class="step"><b>1</b><h3>Paste a link</h3><p>Any brand’s website. We pull in its pieces for you.</p></div>
+    <div class="step"><b>2</b><h3>Build your look</h3><p>Browse by brand and category, then drag pieces onto the board.</p></div>
+    <div class="step"><b>3</b><h3>Save it</h3><p>Sign in to keep your boards on every device.</p></div>
   </div>
-</div>
+
+  <section id="app">
+    <h2>Your board</h2>
+    <p class="lead">Start with a brand’s website link.</p>
+    <form id="authForm" hidden>
+      <input type="email" id="email" placeholder="Email" aria-label="Email" autocomplete="email">
+      <input type="password" id="pw" placeholder="Password (6+ characters)" aria-label="Password" autocomplete="current-password" minlength="6">
+      <button class="go" id="doSignin" type="submit">Sign in</button>
+      <button id="doSignup" type="button">Create account</button>
+      <p id="authMsg"></p>
+    </form>
+    <form id="f">
+      <input type="text" id="url" placeholder="Paste a brand’s website, e.g. brandname.com" aria-label="Brand website" autocomplete="off">
+      <button class="go" id="go" type="submit">Get pieces</button>
+    </form>
+    <p class="note" id="note">Works with Shopify stores for now. Add as many brands as you like.</p>
+    <div class="grid">
+      <section class="panel">
+        <p class="ph"><span>Pieces</span><small id="count">0 pieces</small></p>
+        <div id="rails" hidden>
+          <input type="text" id="q" placeholder="Search pieces" aria-label="Search pieces" autocomplete="off">
+          <div class="rail" id="brandRail"></div>
+          <div class="rail" id="catRail"></div>
+        </div>
+        <div id="list"></div>
+      </section>
+      <section class="panel">
+        <p class="ph"><span>Board</span>
+          <span class="acts"><button id="saveBtn" type="button">Save</button><button id="loadBtn" type="button">Load saved</button><button id="clear" type="button">Clear</button></span></p>
+        <div class="tools">
+          <button id="cut" type="button" disabled>Remove background</button>
+          <button id="restore" type="button" disabled>Restore</button>
+          <label>Strength <input type="range" id="tol" min="15" max="80" value="40"></label>
+        </div>
+        <div id="board"><div id="hint">Drag pieces here, or tap a piece to add it.<br>Tap a piece on the board to select it.</div></div>
+      </section>
+    </div>
+  </section>
+</main>
+
+<footer><div class="w">
+  <p>Steez is a tool for planning outfits. Product photos and names belong to their brands, and shop links lead to each brand’s own website.</p>
+  <span>© 2026 Steez</span>
+</div></footer>
 <img id="ghost" alt="">
 <script>
 (function(){
@@ -106,7 +167,9 @@ var list=document.getElementById('list'),board=document.getElementById('board'),
     tolEl=document.getElementById('tol'),who=document.getElementById('who'),authForm=document.getElementById('authForm'),
     authMsg=document.getElementById('authMsg'),signinBtn=document.getElementById('signinBtn'),
     saveBtn=document.getElementById('saveBtn'),loadBtn=document.getElementById('loadBtn'),signoutBtn=document.getElementById('signoutBtn'),
-    z=1,sel=null,session=null,boardId=null;
+    rails=document.getElementById('rails'),brandRail=document.getElementById('brandRail'),catRail=document.getElementById('catRail'),
+    qEl=document.getElementById('q'),
+    z=1,sel=null,session=null,boardId=null,brands=[],activeBrand='all',activeCat='all';
 
 /* ---------- accounts ---------- */
 try{ session=JSON.parse(localStorage.getItem('ob_session')||'null'); }catch(e){ session=null; }
@@ -151,7 +214,7 @@ function rest(method,path,body,extra){
 }
 function renderAuth(){
   var on=!!session;
-  who.textContent=on?('Signed in as '+(session.email||'your account')):'Not signed in';
+  who.textContent=on?(session.email||'Signed in'):'Not signed in';
   signinBtn.style.display=on?'none':'';
   loadBtn.style.display=on?'':'none';
   signoutBtn.style.display=on?'':'none';
@@ -159,10 +222,10 @@ function renderAuth(){
 }
 function openAuth(msg){
   authForm.hidden=false; authMsg.textContent=msg||'';
+  document.getElementById('app').scrollIntoView();
   document.getElementById('email').focus();
 }
 signinBtn.addEventListener('click',function(){ if(authForm.hidden) openAuth(''); else authForm.hidden=true; });
-
 function creds(){
   var email=document.getElementById('email').value.trim(),pw=document.getElementById('pw').value;
   if(!email||pw.length<6){ authMsg.textContent='Enter your email and a password of at least 6 characters.'; return null; }
@@ -217,7 +280,7 @@ saveBtn.addEventListener('click',function(){
 function loadBoard(){
   note.textContent='Loading your saved board…';
   return rest('GET','boards?select=id,items&order=updated_at.desc&limit=1').then(function(d){
-    if(!d||!d.length){ note.textContent='No saved board yet. Build one and tap Save board.'; return; }
+    if(!d||!d.length){ note.textContent='No saved board yet. Build one and tap Save.'; return; }
     boardId=d[0].id; clearBoard();
     var chain=Promise.resolve();
     (d[0].items||[]).forEach(function(it){
@@ -230,21 +293,96 @@ function loadBoard(){
 }
 loadBtn.addEventListener('click',loadBoard);
 
-/* ---------- store products ---------- */
+/* ---------- categories ---------- */
+var CATS=[['tees','T-shirts & tops'],['hoodies','Hoodies & sweaters'],['jackets','Jackets'],['pants','Pants'],['shorts','Shorts'],['hats','Hats'],['shoes','Shoes'],['acc','Accessories'],['other','Other']];
+var ORDER=['shoes','hats','shorts','pants','jackets','hoodies','tees','acc'];
+var RX={
+  shoes:/sneaker|shoe|boot|sandal|slide|loafer|trainer|footwear|clog/,
+  hats:/\b(hat|hats|cap|caps|beanie|visor|snapback|headwear|balaclava)\b(?!\s*sleeve)/,
+  shorts:/\bshorts\b/,
+  pants:/pant|jean|denim|trouser|cargo|jogger|legging|chino|bottoms/,
+  jackets:/jacket|coat|parka|puffer|windbreaker|bomber|vest|outerwear|anorak|blazer|shell/,
+  hoodies:/hoodie|sweatshirt|crewneck|crew neck|pullover|fleece|jumper|sweater|cardigan|zip-up|zip up/,
+  tees:/t-shirt|\btee\b|\btees\b|shirt|\btop\b|\btops\b|tank|polo|jersey|long sleeve|longsleeve|blouse|bodysuit/,
+  acc:/\b(bag|bags|tote|backpack|belt|scarf|glove|gloves|sock|socks|wallet|jewelry|jewellery|chain|necklace|ring|bracelet|sticker|keychain|accessory|accessories|watch|sunglasses|mask|towel|pin|patch)\b/
+};
+function catOf(s){
+  s=(s||'').toLowerCase(); if(!s) return '';
+  for(var i=0;i<ORDER.length;i++){ if(RX[ORDER[i]].test(s)) return ORDER[i]; }
+  return '';
+}
+function catLabel(k){ for(var i=0;i<CATS.length;i++){ if(CATS[i][0]===k) return CATS[i][1]; } return k; }
+
+/* ---------- brands, categories, pieces list ---------- */
+function chip(label,n,on,fn,rm){
+  var b=document.createElement('button'); b.type='button'; b.className='chip'+(on?' on':'');
+  b.appendChild(document.createTextNode(label));
+  if(n!=null){ var s=document.createElement('small'); s.textContent=n; b.appendChild(s); }
+  if(rm){
+    var x=document.createElement('span'); x.className='rm'; x.textContent='×'; x.setAttribute('aria-label','Remove '+label);
+    x.addEventListener('click',function(e){ e.stopPropagation(); rm(); }); b.appendChild(x);
+  }
+  b.addEventListener('click',fn); return b;
+}
+function render(){
+  list.innerHTML='';
+  if(!brands.length){
+    rails.hidden=true; count.textContent='0 pieces';
+    list.innerHTML='<div class="empty">Paste a brand’s website above to see its pieces here.</div>'; return;
+  }
+  rails.hidden=false;
+  var all=[],total=0;
+  brands.forEach(function(b){ total+=b.products.length; if(activeBrand==='all'||activeBrand===b.host) all=all.concat(b.products); });
+
+  brandRail.innerHTML='';
+  brandRail.appendChild(chip('All brands',total,activeBrand==='all',function(){ activeBrand='all'; activeCat='all'; render(); }));
+  brands.forEach(function(b){
+    brandRail.appendChild(chip(b.host,b.products.length,activeBrand===b.host,function(){ activeBrand=b.host; activeCat='all'; render(); },function(){
+      brands=brands.filter(function(x){ return x.host!==b.host; });
+      if(activeBrand===b.host){ activeBrand='all'; activeCat='all'; }
+      render();
+    }));
+  });
+
+  var cnt={}; all.forEach(function(p){ cnt[p.cat]=(cnt[p.cat]||0)+1; });
+  if(activeCat!=='all'&&!cnt[activeCat]) activeCat='all';
+  catRail.innerHTML='';
+  catRail.appendChild(chip('All',all.length,activeCat==='all',function(){ activeCat='all'; render(); }));
+  CATS.forEach(function(c){
+    if(cnt[c[0]]) catRail.appendChild(chip(c[1],cnt[c[0]],activeCat===c[0],function(){ activeCat=c[0]; render(); }));
+  });
+
+  var q=qEl.value.trim().toLowerCase();
+  var vis=all.filter(function(p){
+    return (activeCat==='all'||p.cat===activeCat)&&(!q||p.title.toLowerCase().indexOf(q)>-1);
+  });
+  vis.forEach(addCard);
+  if(!vis.length) list.innerHTML='<div class="empty">No pieces match. Try a different category or search.</div>';
+  count.textContent=vis.length+' pieces';
+}
+qEl.addEventListener('input',render);
+
 document.getElementById('f').addEventListener('submit',function(e){
   e.preventDefault();
   var v=document.getElementById('url').value.trim();
-  if(!v){ note.textContent='Paste a store link first.'; return; }
-  go.disabled=true; count.textContent='Scanning…'; note.textContent='Fetching pieces…';
+  if(!v){ note.textContent='Paste a brand’s website first.'; return; }
+  go.disabled=true; note.textContent='Fetching pieces…';
   fetch('/api/products?url='+encodeURIComponent(v)).then(function(r){
     return r.json().then(function(d){ if(!r.ok) throw new Error(d.error||'Something went wrong.'); return d; });
   }).then(function(d){
-    list.innerHTML='';
-    d.products.forEach(function(p){ addCard(p); });
-    count.textContent=d.products.length+' found';
-    note.textContent='Showing pieces from '+d.store+'. Paste another link to add more brands.';
+    var ps=d.products.map(function(p){
+      p.brand=d.store;
+      p.cat=catOf(p.type)||catOf(p.title)||catOf(p.tags)||'other';
+      return p;
+    });
+    brands=brands.filter(function(b){ return b.host!==d.store; });
+    brands.push({host:d.store,products:ps});
+    activeBrand=d.store; activeCat='all'; qEl.value='';
+    render();
+    note.textContent='Added '+d.store+' ('+ps.length+' pieces). Use the chips to browse by brand and category.';
+    document.getElementById('url').value='';
   }).catch(function(err){
-    count.textContent='0 found'; note.textContent=err.message;
+    note.textContent=err.message;
   }).then(function(){ go.disabled=false; });
 });
 
@@ -252,7 +390,8 @@ function addCard(p){
   var c=document.createElement('div'); c.className='card'; c.setAttribute('role','button'); c.tabIndex=0;
   c.innerHTML='<img alt="" referrerpolicy="no-referrer" loading="lazy"><span></span><em></em>';
   var im=c.querySelector('img'); im.src=p.image; im.alt=p.title;
-  c.querySelector('span').textContent=p.title; c.querySelector('em').textContent=p.price?('$'+p.price):'';
+  c.querySelector('span').textContent=p.title;
+  c.querySelector('em').textContent=p.brand+(p.price?' · $'+p.price:'');
   c.addEventListener('keydown',function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); place(p,60+Math.random()*100,40+Math.random()*100); } });
   c.addEventListener('pointerdown',function(e){
     var sx=e.clientX,sy=e.clientY,moved=false; c.setPointerCapture(e.pointerId);
@@ -373,6 +512,7 @@ restBtn.addEventListener('click',function(){
   select(el);
 });
 
+render();
 renderAuth();
 if(session) loadBoard();
 })();
