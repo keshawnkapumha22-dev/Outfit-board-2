@@ -51,11 +51,13 @@ module.exports = async (req, res) => {
       .filter((p) => p.images && p.images.length)
       .map((p) => ({
         title: p.title,
+        type: p.product_type || "",
+        tags: Array.isArray(p.tags) ? p.tags.join(" ") : String(p.tags || ""),
         price: p.variants && p.variants[0] ? p.variants[0].price : "",
         image: p.images[0].src,
         link: origin + "/products/" + p.handle,
       }));
-    return res.status(200).json({ store: new URL(origin).hostname, products });
+    return res.status(200).json({ store: new URL(origin).hostname.replace(/^www\./, ""), products });
   } catch (e) {
     return res.status(502).json({ error: "The store didn't respond. Try again in a moment." });
   }
