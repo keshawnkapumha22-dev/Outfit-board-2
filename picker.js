@@ -1,11 +1,64 @@
 (()=>{
 const real=window.fetch.bind(window);
+const SB='https://rskszcsamcarsghqzotn.supabase.co',KEY='sb_publishable_Vl2-ruU_Y3RI_fErSfaG6Q__3jZrBio',MAIL='YOUR-keshawnkapumha22@gmail.com';
 const st=document.createElement('style');
-st.textContent='#pk{position:fixed;inset:0;z-index:90;background:rgba(10,12,30,.5);display:grid;place-items:center;padding:16px}#pk .b{background:var(--card);color:var(--ink);border-radius:24px;padding:20px;width:min(480px,100%);max-height:80vh;display:flex;flex-direction:column;gap:12px}#pk h3{margin:0;font-size:20px}#pk p{margin:0;color:var(--mute);font-size:14px}#pk .o{overflow:auto;display:flex;flex-wrap:wrap;gap:8px}#pk form{display:flex;gap:8px}#pk input{flex:1}';
+st.textContent='#pk{position:fixed;inset:0;z-index:90;background:rgba(10,12,30,.5);display:grid;place-items:center;padding:16px}#pk .b{background:var(--card);color:var(--ink);border-radius:24px;padding:20px;width:min(480px,100%);max-height:80vh;display:flex;flex-direction:column;gap:12px}#pk h3{margin:0;font-size:20px}#pk p{margin:0;color:var(--mute);font-size:14px}#pk .o{overflow:auto;display:flex;flex-wrap:wrap;gap:8px}#pk form{display:flex;gap:8px}#pk input{flex:1}#pk textarea{font:inherit;color:var(--ink);background:var(--bg);border:1.5px solid var(--line);border-radius:16px;padding:12px;min-height:110px;resize:vertical}#pk .t{overflow:auto;font-size:14px;line-height:1.55}#pk .t h4{margin:14px 0 4px;font-size:15px}#pk .t p{margin:0 0 8px;color:var(--ink)}';
 document.head.appendChild(st);
 const f=document.getElementById('f');let what=null;
 if(f){what=document.createElement('input');what.placeholder='Product name (optional)';what.setAttribute('aria-label','Product name');what.style.cssText='order:3;flex:1 1 100%';f.style.flexWrap='wrap';f.appendChild(what)}
 const fail=m=>new Response(JSON.stringify({error:m}),{status:400,headers:{'Content-Type':'application/json'}});
+
+/* feedback, privacy and terms */
+function modal(fill){
+  const w=document.createElement('div');w.id='pk';const b=document.createElement('div');b.className='b';
+  fill(b);
+  const x=document.createElement('button');x.type='button';x.textContent='Close';x.onclick=()=>w.remove();b.appendChild(x);
+  w.onclick=e=>{if(e.target===w)w.remove()};w.appendChild(b);document.body.appendChild(w);
+}
+const el=(t,txt,c)=>{const e=document.createElement(t);if(txt)e.textContent=txt;if(c)e.className=c;return e};
+function feedback(){modal(b=>{
+  const t=el('textarea');t.placeholder='What happened, or what would you change?';t.maxLength=2000;
+  const c=el('input');c.placeholder='Email (optional, if you want a reply)';c.style.flex='none';
+  const s=el('button','Send','go'),m=el('p');
+  s.onclick=async()=>{
+    const v=t.value.trim();if(!v){m.textContent='Write a message first.';return}
+    s.disabled=true;m.textContent='Sending…';
+    try{
+      const r=await real(SB+'/rest/v1/feedback',{method:'POST',headers:{apikey:KEY,Authorization:'Bearer '+KEY,'Content-Type':'application/json',Prefer:'return=minimal'},body:JSON.stringify({message:v,contact:c.value.trim()||null,page:location.hash||'home'})});
+      if(!r.ok)throw 0;t.value='';m.textContent='Thank you! That really helps.';
+    }catch(e){m.textContent='Couldn’t send. Please try again.'}
+    s.disabled=false;
+  };
+  b.append(el('h3','Send feedback'),el('p','Tell us what’s confusing, broken, or missing. Everything helps.'),t,c,s,m);
+})}
+const doc=(title,secs)=>modal(b=>{
+  const d=el('div',null,'t');
+  secs.forEach(x=>{d.append(el('h4',x[0]),el('p',x[1]))});
+  b.append(el('h3',title),d);
+});
+const privacy=()=>doc('Privacy',[
+ ['Last updated','25 November 2026. Steez is an early version, and this page may change.'],
+ ['What we store','Your email address and password (the password is stored securely by our login provider), the boards you save, and any photos you add to a saved board. If you send feedback, we store your message and the email you give us.'],
+ ['What we don’t do','We don’t sell your data or show you ads.'],
+ ['Who helps run Steez','Supabase stores accounts and boards. Vercel hosts the website. They handle data on our behalf.'],
+ ['Using Steez without an account','You can build boards without signing in. They aren’t saved unless you create an account.'],
+ ['Deleting your data','Email '+MAIL+' and we’ll delete your account and boards.'],
+ ['Contact',MAIL]]);
+const terms=()=>doc('Terms of use',[
+ ['Last updated','25 November 2026.'],
+ ['An early version','Steez is early and provided as is, without promises that it will always work or be available. Features may change or stop.'],
+ ['Brands’ content','Product names and photos belong to the brands that made them. Steez helps you plan outfits, and links lead to each brand’s own website.'],
+ ['Fair use','Please don’t copy, resell, or scrape Steez, try to break it, or use it to break the law. We may close accounts that do.'],
+ ['Your boards','You keep ownership of the boards you make and the photos you add. Don’t add photos you don’t have the right to use.'],
+ ['Liability','We aren’t responsible for losses from using Steez, to the extent the law allows.'],
+ ['Contact',MAIL]]);
+const lnk=(t,fn,done)=>{const a=el('a',t);a.href='#';a.style.cssText='color:inherit;margin-right:14px';a.onclick=e=>{e.preventDefault();if(done)done();fn()};return a};
+const ft=document.querySelector('footer .W');
+if(ft){const d=el('div');d.append(lnk('Privacy',privacy),lnk('Terms',terms),lnk('Feedback',feedback));ft.prepend(d)}
+const mn=document.getElementById('menu'),shut=()=>{mn.hidden=true;document.getElementById('shade').hidden=true};
+if(mn){mn.append(lnk('Send feedback',feedback,shut),lnk('Privacy',privacy,shut),lnk('Terms',terms,shut))}
+const zm=document.getElementById('zoom');
+if(zm){const b=el('button','💬');b.setAttribute('aria-label','Send feedback');b.onclick=feedback;zm.appendChild(b)}
 
 /* add photos from the device */
 const MY=[];
