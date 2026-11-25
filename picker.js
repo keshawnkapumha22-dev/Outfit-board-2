@@ -1,6 +1,6 @@
 (()=>{
 const real=window.fetch.bind(window);
-const SB='https://rskszcsamcarsghqzotn.supabase.co',KEY='sb_publishable_Vl2-ruU_Y3RI_fErSfaG6Q__3jZrBio',MAIL='YOUR-keshawnkapumha22@gmail.com';
+const SB='https://rskszcsamcarsghqzotn.supabase.co',KEY='sb_publishable_Vl2-ruU_Y3RI_fErSfaG6Q__3jZrBio',MAIL='keshawnkapumha22@gmail.com';
 const st=document.createElement('style');
 st.textContent='#pk{position:fixed;inset:0;z-index:90;background:rgba(10,12,30,.5);display:grid;place-items:center;padding:16px}#pk .b{background:var(--card);color:var(--ink);border-radius:24px;padding:20px;width:min(480px,100%);max-height:80vh;display:flex;flex-direction:column;gap:12px}#pk h3{margin:0;font-size:20px}#pk p{margin:0;color:var(--mute);font-size:14px}#pk .o{overflow:auto;display:flex;flex-wrap:wrap;gap:8px}#pk form{display:flex;gap:8px}#pk input{flex:1}#pk textarea{font:inherit;color:var(--ink);background:var(--bg);border:1.5px solid var(--line);border-radius:16px;padding:12px;min-height:110px;resize:vertical}#pk .t{overflow:auto;font-size:14px;line-height:1.55}#pk .t h4{margin:14px 0 4px;font-size:15px}#pk .t p{margin:0 0 8px;color:var(--ink)}';
 document.head.appendChild(st);
