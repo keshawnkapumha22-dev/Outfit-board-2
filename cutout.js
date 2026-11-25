@@ -43,3 +43,21 @@ window.fetch=function(u,o){
   return prev(u,o);
 };
 })();
+
+(()=>{
+const m=document.querySelector('meta[name=viewport]');
+const fix=()=>{if(!m)return;const c=m.content;m.content='width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover';setTimeout(()=>{m.content=c},400);scrollTo(0,0)};
+fix();
+const b=document.createElement('button');b.textContent='Page is zoomed in. Tap to fit the screen';
+b.style.cssText='position:fixed;left:12px;top:70px;transform-origin:0 0;z-index:100;padding:12px 18px;border-radius:999px;border:none;background:#12142b;color:#fff;font:600 14px system-ui;display:none';
+b.onclick=()=>{fix();b.style.display='none'};document.body.appendChild(b);
+const vv=window.visualViewport;
+const chk=()=>{
+  if(!vv)return;
+  const z=vv.scale>1.05;b.style.display=z?'block':'none';
+  if(z){b.style.left=vv.offsetLeft+12+'px';b.style.top=vv.offsetTop+70+'px';b.style.transform='scale('+1/vv.scale+')'}
+};
+if(vv){vv.addEventListener('resize',chk);vv.addEventListener('scroll',chk)}
+chk();
+addEventListener('pageshow',fix);
+})();
