@@ -57,9 +57,8 @@ const ft=document.querySelector('footer .W');
 if(ft){const d=el('div');d.append(lnk('Privacy',privacy),lnk('Terms',terms),lnk('Feedback',feedback));ft.prepend(d)}
 const mn=document.getElementById('menu'),shut=()=>{mn.hidden=true;document.getElementById('shade').hidden=true};
 if(mn){mn.append(lnk('Send feedback',feedback,shut),lnk('Privacy',privacy,shut),lnk('Terms',terms,shut))}
-const zm=document.getElementById('zoom');
-if(zm){const b=el('button','💬');b.setAttribute('aria-label','Send feedback');b.onclick=feedback;zm.appendChild(b)}
-
+st.textContent+='#fb{position:fixed;right:14px;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:25;padding:15px 24px;font-size:15px;font-weight:800;letter-spacing:.08em;border-radius:999px;background:var(--ac);color:var(--ai);border:none;box-shadow:0 10px 28px rgba(47,59,255,.4);cursor:pointer}@media(max-width:700px){#app:not([hidden])~#fb{bottom:calc(46vh + 20px)}}';
+const fb=el('button','FEEDBACK');fb.id='fb';fb.setAttribute('aria-label','Send feedback');fb.onclick=feedback;document.body.appendChild(fb);
 /* add photos from the device */
 const MY=[];
 const fi=document.createElement('input');fi.type='file';fi.accept='image/*';fi.multiple=true;fi.hidden=true;document.body.appendChild(fi);
